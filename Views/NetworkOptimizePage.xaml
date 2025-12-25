@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="NetDiagPro.Views.NetworkOptimizePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Background="Transparent">
+
+    <ScrollViewer Padding="32">
+        <StackPanel Spacing="24" MaxWidth="900">
+            <!-- Header -->
+            <StackPanel Spacing="4">
+                <TextBlock Text="网络优化" Style="{StaticResource TitleTextBlockStyle}" />
+                <TextBlock Text="优化网络设置，提升上网体验" 
+                           Style="{StaticResource BodyTextBlockStyle}" 
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+            </StackPanel>
+
+            <!-- Network Health Score -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    CornerRadius="8" Padding="20">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="16">
+                        <Grid Width="80" Height="80">
+                            <ProgressRing x:Name="ScoreRing" IsIndeterminate="False" Value="0" 
+                                          Width="80" Height="80" />
+                            <TextBlock x:Name="ScoreText" Text="--" 
+                                       Style="{StaticResource TitleLargeTextBlockStyle}"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Grid>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="网络健康评分" Style="{StaticResource SubtitleTextBlockStyle}" />
+                            <TextBlock x:Name="GradeText" Text="评估中..." 
+                                       Style="{StaticResource BodyTextBlockStyle}"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Margin="32,0" VerticalAlignment="Center">
+                        <TextBlock x:Name="DnsStatusText" Text="DNS: --" />
+                        <TextBlock x:Name="GatewayStatusText" Text="网关: --" />
+                        <TextBlock x:Name="InternetStatusText" Text="外网: --" />
+                        <TextBlock x:Name="PacketLossText" Text="丢包: --" />
+                    </StackPanel>
+
+                    <Button Grid.Column="2" x:Name="EvaluateBtn" Click="Evaluate_Click"
+                            Style="{StaticResource AccentButtonStyle}" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE9D9;" FontSize="16" />
+                            <TextBlock Text="重新评估" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+            </Border>
+
+            <!-- DNS Optimization -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    CornerRadius="8" Padding="20">
+                <StackPanel Spacing="16">
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <FontIcon Glyph="&#xE774;" Foreground="#3B82F6" FontSize="24" />
+                        <TextBlock Text="DNS 优化" Style="{StaticResource SubtitleTextBlockStyle}" />
+                    </StackPanel>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock x:Name="CurrentDnsText" Text="当前 DNS: 获取中..." />
+                            <TextBlock x:Name="RecommendDnsText" Text="推荐 DNS: --" 
+                                       Foreground="#10B981" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                            <Button x:Name="TestDnsBtn" Click="TestDNS_Click" Content="测速所有 DNS" />
+                            <Button x:Name="ApplyDnsBtn" Click="ApplyDNS_Click" 
+                                    Content="应用推荐 DNS" IsEnabled="False"
+                                    Style="{StaticResource AccentButtonStyle}" />
+                        </StackPanel>
+                    </Grid>
+
+                    <ItemsControl x:Name="DnsResultsList">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Spacing="4" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
+            <!-- Quick Fix -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    CornerRadius="8" Padding="20">
+                <StackPanel Spacing="16">
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <FontIcon Glyph="&#xE90F;" Foreground="#F59E0B" FontSize="24" />
+                        <TextBlock Text="快速修复" Style="{StaticResource SubtitleTextBlockStyle}" />
+                    </StackPanel>
+
+                    <TextBlock Text="常见网络问题一键修复" 
+                               Style="{StaticResource CaptionTextBlockStyle}"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <Button x:Name="FlushDnsBtn" Click="FlushDNS_Click">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE72C;" FontSize="14" />
+                                <TextBlock Text="清除 DNS 缓存" />
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="ReleaseRenewBtn" Click="ReleaseRenew_Click">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE895;" FontSize="14" />
+                                <TextBlock Text="释放续订 IP" />
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="ResetWinsockBtn" Click="ResetWinsock_Click">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE777;" FontSize="14" />
+                                <TextBlock Text="重置 Winsock" />
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="ResetTcpBtn" Click="ResetTCP_Click">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE74E;" FontSize="14" />
+                                <TextBlock Text="重置 TCP/IP" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+
+                    <TextBlock x:Name="FixStatusText" Text="" 
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                </StackPanel>
+            </Border>
+
+            <!-- Performance Optimization -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    CornerRadius="8" Padding="20">
+                <StackPanel Spacing="16">
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <FontIcon Glyph="&#xE945;" Foreground="#10B981" FontSize="24" />
+                        <TextBlock Text="性能优化" Style="{StaticResource SubtitleTextBlockStyle}" />
+                    </StackPanel>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0">
+                            <TextBlock x:Name="MtuText" Text="当前 MTU: 1500" />
+                            <TextBlock x:Name="OptimalMtuText" Text="最佳 MTU: 检测中..." 
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
+
+                        <Button Grid.Column="1" x:Name="DetectMtuBtn" Click="DetectMTU_Click"
+                                Content="检测最佳 MTU" />
+                    </Grid>
+
+                    <InfoBar x:Name="MtuInfoBar" IsOpen="False" Severity="Informational"
+                             Title="MTU 优化提示" 
+                             Message="更改 MTU 需要管理员权限，建议在专业人员指导下操作。" />
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

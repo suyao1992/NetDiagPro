@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ContentDialog
+    x:Class="NetDiagPro.Views.ExportDialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Title="导出诊断报告"
+    PrimaryButtonText="导出"
+    CloseButtonText="取消"
+    DefaultButton="Primary"
+    PrimaryButtonClick="Export_Click">
+
+    <StackPanel Spacing="16" Width="350">
+        <!-- Format Selection -->
+        <StackPanel Spacing="8">
+            <TextBlock Text="选择导出格式" Style="{StaticResource BodyStrongTextBlockStyle}" />
+            <RadioButtons x:Name="FormatSelector" SelectedIndex="0">
+                <RadioButton Tag="html">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon Glyph="&#xE8A1;" FontSize="16" />
+                        <TextBlock Text="HTML 报告 (可打印为 PDF)" />
+                    </StackPanel>
+                </RadioButton>
+                <RadioButton Tag="csv">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon Glyph="&#xE9F9;" FontSize="16" />
+                        <TextBlock Text="CSV 表格 (Excel 兼容)" />
+                    </StackPanel>
+                </RadioButton>
+                <RadioButton Tag="json">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon Glyph="&#xE943;" FontSize="16" />
+                        <TextBlock Text="JSON 数据 (API 集成)" />
+                    </StackPanel>
+                </RadioButton>
+            </RadioButtons>
+        </StackPanel>
+
+        <!-- Include Options -->
+        <StackPanel Spacing="8">
+            <TextBlock Text="包含内容" Style="{StaticResource BodyStrongTextBlockStyle}" />
+            <CheckBox x:Name="IncludeSpeedTest" Content="测速结果" IsChecked="True" />
+            <CheckBox x:Name="IncludeHealth" Content="健康评分" IsChecked="True" />
+            <CheckBox x:Name="IncludeIPInfo" Content="IP 信息" IsChecked="True" />
+            <CheckBox x:Name="IncludeLAN" Content="局域网设备" IsChecked="True" />
+        </StackPanel>
+
+        <!-- Status -->
+        <InfoBar x:Name="StatusBar" IsOpen="False" />
+        <ProgressBar x:Name="ExportProgress" IsIndeterminate="True" Visibility="Collapsed" />
+    </StackPanel>
+</ContentDialog>

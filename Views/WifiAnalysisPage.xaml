@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="NetDiagPro.Views.WifiAnalysisPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Background="Transparent">
+
+    <ScrollViewer Padding="32">
+        <StackPanel Spacing="24">
+            <!-- Header -->
+            <StackPanel>
+                <TextBlock Text="Wi-Fi 信道分析" Style="{StaticResource TitleTextBlockStyle}" />
+                <TextBlock Text="扫描周围网络，优化无线信道" 
+                           Style="{StaticResource BodyTextBlockStyle}" 
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+            </StackPanel>
+
+            <!-- Current Connection -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    CornerRadius="8" Padding="20">
+                <StackPanel Spacing="12">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon Glyph="&#xE701;" Foreground="{ThemeResource AccentFillColorDefaultBrush}" />
+                        <TextBlock Text="当前连接" Style="{StaticResource SubtitleTextBlockStyle}" />
+                    </StackPanel>
+                    
+                    <Grid ColumnSpacing="24" RowSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+
+                        <StackPanel Grid.Column="0" Spacing="4">
+                            <TextBlock Text="网络名称" Style="{StaticResource CaptionTextBlockStyle}" 
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <TextBlock x:Name="CurrentSSID" Text="--" Style="{StaticResource BodyTextBlockStyle}" />
+                        </StackPanel>
+                        
+                        <StackPanel Grid.Column="1" Spacing="4">
+                            <TextBlock Text="信道" Style="{StaticResource CaptionTextBlockStyle}" 
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <TextBlock x:Name="CurrentChannel" Text="--" Style="{StaticResource BodyTextBlockStyle}" />
+                        </StackPanel>
+                        
+                        <StackPanel Grid.Column="2" Spacing="4">
+                            <TextBlock Text="信号强度" Style="{StaticResource CaptionTextBlockStyle}" 
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <TextBlock x:Name="CurrentSignal" Text="--" Style="{StaticResource BodyTextBlockStyle}" />
+                        </StackPanel>
+                        
+                        <StackPanel Grid.Column="3" Spacing="4">
+                            <TextBlock Text="频段" Style="{StaticResource CaptionTextBlockStyle}" 
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <TextBlock x:Name="CurrentBand" Text="--" Style="{StaticResource BodyTextBlockStyle}" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Row="1" Grid.Column="0" Spacing="4">
+                            <TextBlock Text="接收速率" Style="{StaticResource CaptionTextBlockStyle}" 
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <TextBlock x:Name="ReceiveRate" Text="--" Style="{StaticResource BodyTextBlockStyle}" />
+                        </StackPanel>
+                        
+                        <StackPanel Grid.Row="1" Grid.Column="1" Spacing="4">
+                            <TextBlock Text="发送速率" Style="{StaticResource CaptionTextBlockStyle}" 
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <TextBlock x:Name="TransmitRate" Text="--" Style="{StaticResource BodyTextBlockStyle}" />
+                        </StackPanel>
+                        
+                        <StackPanel Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2" Spacing="4">
+                            <TextBlock Text="认证方式" Style="{StaticResource CaptionTextBlockStyle}" 
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <TextBlock x:Name="Authentication" Text="--" Style="{StaticResource BodyTextBlockStyle}" />
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Channel Analysis -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    CornerRadius="8" Padding="20">
+                <StackPanel Spacing="16">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon Glyph="&#xE9D9;" Foreground="#8B5CF6" />
+                        <TextBlock Text="信道分析" Style="{StaticResource SubtitleTextBlockStyle}" />
+                        <Button x:Name="ScanBtn" Click="Scan_Click" Margin="16,0,0,0">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <FontIcon Glyph="&#xE72C;" FontSize="14" />
+                                <TextBlock Text="扫描" />
+                            </StackPanel>
+                        </Button>
+                        <ProgressRing x:Name="ScanProgress" Width="20" Height="20" IsActive="False" Visibility="Collapsed" />
+                    </StackPanel>
+
+                    <Grid ColumnSpacing="24">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Border Grid.Column="0" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                                CornerRadius="8" Padding="16">
+                            <StackPanel Spacing="8" HorizontalAlignment="Center">
+                                <TextBlock Text="发现网络" Style="{StaticResource CaptionTextBlockStyle}" 
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                                <TextBlock x:Name="TotalNetworks" Text="--" FontSize="28" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+
+                        <Border Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                                CornerRadius="8" Padding="16">
+                            <StackPanel Spacing="8" HorizontalAlignment="Center">
+                                <TextBlock Text="推荐信道 (2.4G)" Style="{StaticResource CaptionTextBlockStyle}" 
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                                <TextBlock x:Name="Best24Channel" Text="--" FontSize="28" FontWeight="SemiBold" 
+                                           Foreground="#10B981" HorizontalAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+
+                        <Border Grid.Column="2" Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                                CornerRadius="8" Padding="16">
+                            <StackPanel Spacing="8" HorizontalAlignment="Center">
+                                <TextBlock Text="拥挤程度" Style="{StaticResource CaptionTextBlockStyle}" 
+                                           Foreground="{ThemeResource TextFillColorSecondaryBrush}" HorizontalAlignment="Center" />
+                                <TextBlock x:Name="CongestionLevel" Text="--" FontSize="28" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <!-- Recommendation -->
+                    <InfoBar x:Name="RecommendationBar" IsOpen="False" Severity="Informational" Title="优化建议" />
+                </StackPanel>
+            </Border>
+
+            <!-- Nearby Networks -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    CornerRadius="8" Padding="20">
+                <StackPanel Spacing="12">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon Glyph="&#xE774;" Foreground="#3B82F6" />
+                        <TextBlock Text="周围网络" Style="{StaticResource SubtitleTextBlockStyle}" />
+                    </StackPanel>
+
+                    <ListView x:Name="NetworksList" MaxHeight="300">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid Padding="8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="80" />
+                                        <ColumnDefinition Width="60" />
+                                        <ColumnDefinition Width="80" />
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" Text="{Binding SSID}" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="1" Text="{Binding Band}" 
+                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="2" VerticalAlignment="Center">
+                                        <Run Text="Ch " /><Run Text="{Binding Channel}" />
+                                    </TextBlock>
+                                    <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
+                                        <FontIcon Glyph="&#xE701;" FontSize="12" Margin="0,0,4,0" />
+                                        <TextBlock Text="{Binding Signal}" />
+                                        <TextBlock Text="%" />
+                                    </StackPanel>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

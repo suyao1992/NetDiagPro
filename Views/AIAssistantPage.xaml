@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="NetDiagPro.Views.AIAssistantPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Background="Transparent">
+
+    <Grid Padding="32">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Spacing="4" Margin="0,0,0,16">
+            <StackPanel Orientation="Horizontal" Spacing="12">
+                <FontIcon Glyph="&#xE99A;" Foreground="{ThemeResource AccentFillColorDefaultBrush}" FontSize="28" />
+                <TextBlock Text="AI 网络助手" Style="{StaticResource TitleTextBlockStyle}" />
+            </StackPanel>
+            <TextBlock Text="智能诊断网络问题，获取个性化优化建议" 
+                       Style="{StaticResource BodyTextBlockStyle}" 
+                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+        </StackPanel>
+
+        <!-- Chat Messages -->
+        <Border Grid.Row="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                CornerRadius="8" Padding="16">
+            <ScrollViewer x:Name="ChatScrollViewer">
+                <ItemsControl x:Name="MessagesList">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Spacing="12" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </ScrollViewer>
+        </Border>
+
+        <!-- Quick Actions -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" Spacing="8" Margin="0,12,0,12">
+            <Button Click="QuickAction_Click" Tag="测一下网速" Content="🚀 测网速" />
+            <Button Click="QuickAction_Click" Tag="扫描局域网设备" Content="📡 扫局域网" />
+            <Button Click="QuickAction_Click" Tag="帮我优化DNS" Content="🔧 优化DNS" />
+            <Button Click="QuickAction_Click" Tag="诊断一下网络问题" Content="🔍 诊断问题" />
+            <Button Click="QuickAction_Click" Tag="检测我的公网IP" Content="🌐 查IP" />
+        </StackPanel>
+
+        <!-- Input Area -->
+        <Grid Grid.Row="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <TextBox x:Name="InputBox" Grid.Column="0" 
+                     PlaceholderText="输入你的问题，例如：为什么打游戏很卡？"
+                     AcceptsReturn="False" KeyDown="InputBox_KeyDown" />
+            
+            <Button Grid.Column="1" x:Name="SendBtn" Click="Send_Click" 
+                    Style="{StaticResource AccentButtonStyle}" Margin="8,0,0,0">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <FontIcon Glyph="&#xE724;" FontSize="16" />
+                    <TextBlock Text="发送" />
+                </StackPanel>
+            </Button>
+        </Grid>
+    </Grid>
+</Page>

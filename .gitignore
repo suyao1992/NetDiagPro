@@ -1,0 +1,100 @@
+# =======================================================
+# .gitignore for WinUI / .NET / Visual Studio
+# =======================================================
+
+# Build Results
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# MSBuild
+*.log
+msbuildlog.txt
+
+# NuGet
+*.nupkg
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Desktop ini
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# JetBrains Rider
+.idea/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Resharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# Test Results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+
+# NCrunch
+*.ncrunch*
+_NCrunch_*
+.*crunch*.local.xml
+nCrunchTemp_*
+
+# Publish output
+[Pp]ublish/
+[Pp]ublished/
+
+# MSIX packages
+*.msix
+*.msixbundle
+*.appx
+*.appxbundle
+
+# Windows Store app package directories
+AppPackages/
+BundleArtifacts/
+
+# Backup and temp files
+*~
+*.bak
+*.tmp
+*.temp
+
+# Lock files
+project.lock.json
+
+# Others
+*.cache
+*.pidb
+*.pdb
+*.ilk
+*.meta
+*.obj
+*.iobj
+*.ipdb
+*.idb
+
+# macOS
+.DS_Store
+
+# Secrets - never commit
+appsettings.Development.json
+secrets.json
+*.pfx
+*.snk

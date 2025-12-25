@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="NetDiagPro.Views.LANDiagnosticsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Background="Transparent">
+
+    <ScrollViewer Padding="32">
+        <StackPanel Spacing="24">
+            <!-- Header -->
+            <TextBlock Text="内网诊断" Style="{StaticResource TitleTextBlockStyle}" />
+            <TextBlock Text="扫描局域网设备、分析网络拓扑、诊断网络问题" 
+                       Style="{StaticResource BodyTextBlockStyle}" 
+                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+
+            <!-- Action Buttons -->
+            <StackPanel Orientation="Horizontal" Spacing="12">
+                <Button x:Name="QuickScanBtn" Click="QuickScan_Click" Style="{StaticResource AccentButtonStyle}">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon Glyph="&#xE774;" FontSize="16" />
+                        <TextBlock Text="快速扫描" />
+                    </StackPanel>
+                </Button>
+                <Button x:Name="DeepScanBtn" Click="DeepScan_Click">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon Glyph="&#xEB51;" FontSize="16" />
+                        <TextBlock Text="深度扫描" />
+                    </StackPanel>
+                </Button>
+                <Button x:Name="DiagnoseBtn" Click="Diagnose_Click">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <FontIcon Glyph="&#xE9D9;" FontSize="16" />
+                        <TextBlock Text="网络诊断" />
+                    </StackPanel>
+                </Button>
+                <ProgressRing x:Name="ScanProgress" IsActive="False" Width="24" Height="24" />
+            </StackPanel>
+
+            <!-- Network Info Cards -->
+            <Grid ColumnSpacing="16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Local Info -->
+                <Border Grid.Column="0" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        CornerRadius="8" Padding="16">
+                    <StackPanel Spacing="8">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE839;" Foreground="{ThemeResource AccentFillColorDefaultBrush}" FontSize="20" />
+                            <TextBlock Text="本机信息" Style="{StaticResource SubtitleTextBlockStyle}" />
+                        </StackPanel>
+                        <TextBlock x:Name="LocalIpText" Text="本机 IP: 获取中..." 
+                                   Style="{StaticResource BodyTextBlockStyle}" />
+                        <TextBlock x:Name="GatewayText" Text="网关: 获取中..." 
+                                   Style="{StaticResource BodyTextBlockStyle}" />
+                        <TextBlock x:Name="MacText" Text="MAC: 获取中..." 
+                                   Style="{StaticResource CaptionTextBlockStyle}"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+                </Border>
+
+                <!-- WiFi Info -->
+                <Border Grid.Column="1" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                        CornerRadius="8" Padding="16">
+                    <StackPanel Spacing="8">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <FontIcon Glyph="&#xE701;" Foreground="#10B981" FontSize="20" />
+                            <TextBlock Text="WiFi 信息" Style="{StaticResource SubtitleTextBlockStyle}" />
+                        </StackPanel>
+                        <TextBlock x:Name="WifiSsidText" Text="SSID: -" 
+                                   Style="{StaticResource BodyTextBlockStyle}" />
+                        <TextBlock x:Name="WifiSignalText" Text="信号: -" 
+                                   Style="{StaticResource BodyTextBlockStyle}" />
+                        <TextBlock x:Name="WifiSpeedText" Text="速率: -" 
+                                   Style="{StaticResource CaptionTextBlockStyle}"
+                                   Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    </StackPanel>
+                </Border>
+            </Grid>
+
+            <!-- Diagnostics Results -->
+            <Border x:Name="DiagnosticsCard" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    CornerRadius="8" Padding="16" Visibility="Collapsed">
+                <StackPanel Spacing="8">
+                    <TextBlock Text="诊断结果" Style="{StaticResource SubtitleTextBlockStyle}" />
+                    <ItemsControl x:Name="DiagnosticsResults">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Spacing="4" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                </StackPanel>
+            </Border>
+
+            <!-- Device List -->
+            <StackPanel Spacing="12">
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <FontIcon Glyph="&#xE8CE;" Foreground="{ThemeResource AccentFillColorDefaultBrush}" FontSize="20" />
+                    <TextBlock Text="设备列表" Style="{StaticResource SubtitleTextBlockStyle}" />
+                    <TextBlock x:Name="DeviceCountText" Text="" 
+                               Style="{StaticResource CaptionTextBlockStyle}"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                               VerticalAlignment="Center" />
+                </StackPanel>
+                <ItemsControl x:Name="DeviceList">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Spacing="8" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </StackPanel>
+        </StackPanel>
+    </ScrollViewer>
+</Page>

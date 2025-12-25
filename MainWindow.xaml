@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Window
+    x:Class="NetDiagPro.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:NetDiagPro"
+    Title="NetDiag Pro 4.0">
+
+    <Grid>
+        <NavigationView
+            x:Name="NavView"
+            IsBackButtonVisible="Collapsed"
+            IsSettingsVisible="True"
+            PaneDisplayMode="Left"
+            SelectionChanged="NavView_SelectionChanged">
+
+            <NavigationView.MenuItems>
+                <NavigationViewItem Content="概览" Icon="Home" Tag="Dashboard" />
+                <NavigationViewItem Content="实时监控" Icon="Clock" Tag="LiveMonitor" />
+                <NavigationViewItem Content="带宽测速" Icon="Download" Tag="SpeedTest" />
+                <NavigationViewItem Content="路由追踪" Icon="Globe" Tag="Traceroute" />
+                <NavigationViewItem Content="内网诊断" Icon="AllApps" Tag="LANDiagnostics" />
+                <NavigationViewItemSeparator />
+                <NavigationViewItem Content="网络优化" Tag="NetworkOptimize">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE90F;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="AI 助手" Tag="AIAssistant">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE99A;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="流量监控" Tag="TrafficMonitor">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE9F5;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItem Content="Wi-Fi 分析" Tag="WifiAnalysis">
+                    <NavigationViewItem.Icon>
+                        <FontIcon Glyph="&#xE701;" />
+                    </NavigationViewItem.Icon>
+                </NavigationViewItem>
+                <NavigationViewItemSeparator />
+                <NavigationViewItem Content="历史记录" Icon="Clock" Tag="History" />
+            </NavigationView.MenuItems>
+
+            <Frame x:Name="ContentFrame" />
+        </NavigationView>
+    </Grid>
+</Window>

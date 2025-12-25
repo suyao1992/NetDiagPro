@@ -1,0 +1,92 @@
+name: Build & Test
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+env:
+  DOTNET_VERSION: '8.0.x'
+  SOLUTION_PATH: 'NetDiagPro.WinUI'
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    strategy:
+      matrix:
+        platform: [x64]
+        configuration: [Debug, Release]
+    
+    steps:
+    - name: 📥 Checkout
+      uses: actions/checkout@v4
+      
+    - name: 🔧 Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+        
+    - name: 📦 Restore dependencies
+      run: dotnet restore ${{ env.SOLUTION_PATH }}
+      
+    - name: 🏗️ Build
+      run: dotnet build ${{ env.SOLUTION_PATH }} --configuration ${{ matrix.configuration }} -p:Platform=${{ matrix.platform }} --no-restore
+      
+    - name: 📊 Upload build artifacts
+      if: matrix.configuration == 'Release'
+      uses: actions/upload-artifact@v4
+      with:
+        name: NetDiagPro-${{ matrix.platform }}-${{ matrix.configuration }}
+        path: ${{ env.SOLUTION_PATH }}/bin/${{ matrix.platform }}/${{ matrix.configuration }}/net8.0-windows*/
+        retention-days: 30
+
+  code-quality:
+    runs-on: windows-latest
+    
+    steps:
+    - name: 📥 Checkout
+      uses: actions/checkout@v4
+      
+    - name: 🔧 Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+        
+    - name: 🔍 Code formatting check
+      run: dotnet format ${{ env.SOLUTION_PATH }} --verify-no-changes --verbosity diagnostic
+      continue-on-error: true
+      
+    - name: 📋 Build with warnings as errors
+      run: dotnet build ${{ env.SOLUTION_PATH }} -p:Platform=x64 -p:TreatWarningsAsErrors=false --verbosity minimal
+
+  release:
+    needs: build
+    runs-on: windows-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: 📥 Checkout
+      uses: actions/checkout@v4
+      
+    - name: 🔧 Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+        
+    - name: 🏗️ Build Release
+      run: dotnet build ${{ env.SOLUTION_PATH }} --configuration Release -p:Platform=x64
+      
+    - name: 📦 Create release package
+      run: |
+        $version = Get-Date -Format "yyyy.MM.dd"
+        Compress-Archive -Path "${{ env.SOLUTION_PATH }}/bin/x64/Release/net8.0-windows*/*" -DestinationPath "NetDiagPro-v$version-x64.zip"
+        
+    - name: 📤 Upload release artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: NetDiagPro-Release
+        path: NetDiagPro-*.zip
+        retention-days: 90

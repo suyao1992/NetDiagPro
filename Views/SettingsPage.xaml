@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Page
+    x:Class="NetDiagPro.Views.SettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    Background="Transparent">
+
+    <ScrollViewer Padding="32">
+        <StackPanel Spacing="24" MaxWidth="800">
+            <!-- Header -->
+            <TextBlock Text="设置" Style="{StaticResource TitleTextBlockStyle}" />
+
+            <!-- Appearance -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    CornerRadius="8" Padding="20">
+                <StackPanel Spacing="16">
+                    <TextBlock Text="外观" Style="{StaticResource SubtitleTextBlockStyle}" />
+                    
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="主题模式" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                            <TextBlock Text="选择应用的外观主题" 
+                                       Style="{StaticResource CaptionTextBlockStyle}"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
+                        <ComboBox x:Name="ThemeCombo" Grid.Column="1" 
+                                  SelectionChanged="ThemeCombo_Changed" MinWidth="150">
+                            <ComboBoxItem Content="跟随系统" Tag="Default" />
+                            <ComboBoxItem Content="浅色" Tag="Light" />
+                            <ComboBoxItem Content="深色" Tag="Dark" />
+                        </ComboBox>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Language -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    CornerRadius="8" Padding="20">
+                <StackPanel Spacing="16">
+                    <TextBlock Text="语言" Style="{StaticResource SubtitleTextBlockStyle}" />
+                    
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="界面语言" Style="{StaticResource BodyStrongTextBlockStyle}" />
+                            <TextBlock Text="更改应用的显示语言" 
+                                       Style="{StaticResource CaptionTextBlockStyle}"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
+                        <ComboBox x:Name="LanguageCombo" Grid.Column="1" 
+                                  SelectionChanged="LanguageCombo_Changed" MinWidth="150">
+                            <ComboBoxItem Content="简体中文" Tag="zh-CN" />
+                            <ComboBoxItem Content="English" Tag="en-US" />
+                        </ComboBox>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- About -->
+            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                    CornerRadius="8" Padding="20">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="关于" Style="{StaticResource SubtitleTextBlockStyle}" />
+                    
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <FontIcon Glyph="&#xE774;" FontSize="48" 
+                                  Foreground="{ThemeResource AccentFillColorDefaultBrush}" />
+                        <StackPanel>
+                            <TextBlock Text="NetDiag Pro" Style="{StaticResource SubtitleTextBlockStyle}" />
+                            <TextBlock Text="版本 4.0.0" 
+                                       Style="{StaticResource CaptionTextBlockStyle}"
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <TextBlock Text="专业网络诊断工具 - Windows 11 原生体验" 
+                               Style="{StaticResource BodyTextBlockStyle}"
+                               Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                    
+                    <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,8,0,0">
+                        <HyperlinkButton Content="GitHub" NavigateUri="https://github.com" />
+                        <HyperlinkButton Content="反馈问题" NavigateUri="https://github.com/issues" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+    </ScrollViewer>
+</Page>
