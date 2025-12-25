@@ -31,11 +31,20 @@ jobs:
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
         
-    - name: 📦 Restore main app only
-      run: dotnet restore NetDiagPro.sln
+    - name: 🗑️ Exclude tests directory from build
+      shell: pwsh
+      run: |
+        # Temporarily rename tests dir to prevent MSBuild discovery
+        if (Test-Path "tests") { 
+          Rename-Item -Path "tests" -NewName "_tests_excluded" -Force
+          Write-Host "Excluded tests directory from build"
+        }
+        
+    - name: 📦 Restore main app
+      run: dotnet restore NetDiagPro.csproj
       
     - name: 🏗️ Build main app
-      run: dotnet build NetDiagPro.sln --configuration ${{ matrix.configuration }} -p:Platform=x64 --no-restore
+      run: dotnet build NetDiagPro.csproj --configuration ${{ matrix.configuration }} -p:Platform=x64 --no-restore
       
     - name: 📊 Upload build artifacts
       if: matrix.configuration == 'Release'
@@ -46,7 +55,7 @@ jobs:
         retention-days: 30
 
   # ==========================================
-  # Test Job - Build Test Project Separately
+  # Test Job - Build Test Project
   # ==========================================
   test-build:
     name: 🧪 Build Tests
@@ -91,11 +100,18 @@ jobs:
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
         
+    - name: 🗑️ Exclude tests directory
+      shell: pwsh
+      run: |
+        if (Test-Path "tests") { 
+          Rename-Item -Path "tests" -NewName "_tests_excluded" -Force
+        }
+        
     - name: 📦 Restore
-      run: dotnet restore NetDiagPro.sln
+      run: dotnet restore NetDiagPro.csproj
         
     - name: 🏗️ Build Release
-      run: dotnet build NetDiagPro.sln --configuration Release -p:Platform=x64 --no-restore
+      run: dotnet build NetDiagPro.csproj --configuration Release -p:Platform=x64 --no-restore
       
     - name: 📦 Create release package
       shell: pwsh
