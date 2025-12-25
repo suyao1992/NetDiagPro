@@ -31,13 +31,12 @@ jobs:
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
         
-    - name: 🗑️ Exclude tests directory from build
+    - name: 🗑️ Remove tests directory completely
       shell: pwsh
       run: |
-        # Temporarily rename tests dir to prevent MSBuild discovery
         if (Test-Path "tests") { 
-          Rename-Item -Path "tests" -NewName "_tests_excluded" -Force
-          Write-Host "Excluded tests directory from build"
+          Remove-Item -Path "tests" -Recurse -Force
+          Write-Host "Removed tests directory"
         }
         
     - name: 📦 Restore main app
@@ -60,7 +59,6 @@ jobs:
   test-build:
     name: 🧪 Build Tests
     runs-on: windows-latest
-    needs: build
     
     steps:
     - name: 📥 Checkout
@@ -100,11 +98,11 @@ jobs:
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
         
-    - name: 🗑️ Exclude tests directory
+    - name: 🗑️ Remove tests directory
       shell: pwsh
       run: |
         if (Test-Path "tests") { 
-          Rename-Item -Path "tests" -NewName "_tests_excluded" -Force
+          Remove-Item -Path "tests" -Recurse -Force
         }
         
     - name: 📦 Restore

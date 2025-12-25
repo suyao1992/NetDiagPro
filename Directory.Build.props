@@ -1,0 +1,9 @@
+<Project>
+  <!-- Exclude tests directory from being discovered by MSBuild -->
+  <ItemGroup>
+    <Compile Remove="tests\**\*.cs" />
+    <Compile Remove="_tests_excluded\**\*.cs" />
+    <None Remove="tests\**\*" />
+    <None Remove="_tests_excluded\**\*" />
+  </ItemGroup>
+</Project>
