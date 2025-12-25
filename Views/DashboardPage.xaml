@@ -117,11 +117,17 @@
                     CornerRadius="8" Padding="20" Margin="0,8,0,0">
                 <StackPanel Spacing="12">
                     <TextBlock Text="IP 信息" Style="{StaticResource SubtitleTextBlockStyle}" />
-                    <Grid ColumnSpacing="32">
+                    <Grid ColumnSpacing="32" RowSpacing="12">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
                         <StackPanel Grid.Column="0" Spacing="4">
                             <TextBlock Text="本地 IP" Style="{StaticResource CaptionTextBlockStyle}" 
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
@@ -131,6 +137,16 @@
                             <TextBlock Text="公网 IP" Style="{StaticResource CaptionTextBlockStyle}" 
                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
                             <TextBlock x:Name="PublicIpText" Text="获取中..." Style="{StaticResource BodyTextBlockStyle}" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="2" Spacing="4">
+                            <TextBlock Text="地理位置" Style="{StaticResource CaptionTextBlockStyle}" 
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <TextBlock x:Name="IpLocationText" Text="获取中..." Style="{StaticResource BodyTextBlockStyle}" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="3" Spacing="4">
+                            <TextBlock Text="运营商" Style="{StaticResource CaptionTextBlockStyle}" 
+                                       Foreground="{ThemeResource TextFillColorSecondaryBrush}" />
+                            <TextBlock x:Name="IspText" Text="获取中..." Style="{StaticResource BodyTextBlockStyle}" />
                         </StackPanel>
                     </Grid>
                 </StackPanel>

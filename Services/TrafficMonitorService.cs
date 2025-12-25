@@ -20,11 +20,11 @@ public class TrafficMonitorService
 
         try
         {
-            // 使用 netstat 获取连接信息
+            // 使用 netstat -ano 获取连接信息（不需要管理员权限）
             var psi = new ProcessStartInfo
             {
                 FileName = "netstat",
-                Arguments = "-b -n",
+                Arguments = "-ano",
                 RedirectStandardOutput = true,
                 UseShellExecute = false,
                 CreateNoWindow = true
@@ -36,36 +36,42 @@ public class TrafficMonitorService
             var output = await process.StandardOutput.ReadToEndAsync();
             await process.WaitForExitAsync();
 
-            // 解析 netstat 输出
+            // 解析 netstat 输出，统计每个 PID 的连接数
             var lines = output.Split('\n');
-            var processConnections = new Dictionary<string, int>();
+            var pidConnections = new Dictionary<int, int>();
 
-            string? currentProcess = null;
             foreach (var line in lines)
             {
-                var trimmed = line.Trim();
-                if (trimmed.StartsWith("[") && trimmed.EndsWith("]"))
+                if (!line.Contains("ESTABLISHED") && !line.Contains("CLOSE_WAIT") && 
+                    !line.Contains("TIME_WAIT") && !line.Contains("LISTENING"))
+                    continue;
+
+                var parts = line.Trim().Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length >= 5 && int.TryParse(parts[^1], out int pid))
                 {
-                    currentProcess = trimmed.Trim('[', ']');
-                }
-                else if (trimmed.StartsWith("TCP") || trimmed.StartsWith("UDP"))
-                {
-                    if (!string.IsNullOrEmpty(currentProcess))
-                    {
-                        if (!processConnections.ContainsKey(currentProcess))
-                            processConnections[currentProcess] = 0;
-                        processConnections[currentProcess]++;
-                    }
+                    if (!pidConnections.ContainsKey(pid))
+                        pidConnections[pid] = 0;
+                    pidConnections[pid]++;
                 }
             }
 
-            foreach (var (name, connections) in processConnections.OrderByDescending(x => x.Value))
+            // 获取进程名称
+            foreach (var (pid, connections) in pidConnections.OrderByDescending(x => x.Value))
             {
-                results.Add(new ProcessNetworkInfo
+                if (pid == 0) continue;
+                try
                 {
-                    ProcessName = name,
-                    ConnectionCount = connections
-                });
+                    var proc = Process.GetProcessById(pid);
+                    results.Add(new ProcessNetworkInfo
+                    {
+                        ProcessName = proc.ProcessName,
+                        ConnectionCount = connections
+                    });
+                }
+                catch
+                {
+                    // 进程可能已退出
+                }
             }
         }
         catch { }
