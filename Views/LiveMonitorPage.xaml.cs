@@ -9,9 +9,11 @@ namespace NetDiagPro.Views;
 public sealed partial class LiveMonitorPage : Page
 {
     private readonly NetworkTesterService _tester = new();
+    private readonly DatabaseService _db = new();
     private readonly ObservableCollection<MonitorTarget> _targets = new();
     private bool _isRunning = false;
     private CancellationTokenSource? _cts;
+
 
     private readonly string[] _defaultTargets = new[]
     {
@@ -165,6 +167,16 @@ public sealed partial class LiveMonitorPage : Page
                 {
                     var result = await _tester.TestTargetAsync(url);
                     UpdateCardUI(card, result);
+                    
+                    // Save to history database
+                    await _db.SaveRecordAsync(
+                        target: new Uri(url).Host,
+                        latencyMs: result.TotalMs,
+                        dnsMs: result.DnsMs,
+                        tcpMs: result.TcpMs,
+                        statusCode: result.StatusCode,
+                        success: result.Success
+                    );
                 }
                 catch
                 {

@@ -7,6 +7,7 @@ namespace NetDiagPro.Views;
 public sealed partial class SpeedTestPage : Page
 {
     private readonly SpeedTestService _speedService = new();
+    private readonly DatabaseService _db = new();
     private bool _isTesting = false;
 
     public SpeedTestPage()
@@ -41,6 +42,16 @@ public sealed partial class SpeedTestPage : Page
             var uploadSpeed = await _speedService.MeasureUploadSpeedAsync(
                 (speed) => UploadSpeedText.Text = $"{speed:F1}");
             UploadSpeedText.Text = $"{uploadSpeed:F1}";
+
+            // Save to history database
+            await _db.SaveRecordAsync(
+                target: "SpeedTest",
+                latencyMs: ping,
+                dnsMs: 0,
+                tcpMs: 0,
+                statusCode: 200,
+                success: true
+            );
 
             StatusText.Text = "测速完成";
         }
