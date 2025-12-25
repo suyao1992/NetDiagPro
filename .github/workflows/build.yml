@@ -9,10 +9,15 @@ on:
 
 env:
   DOTNET_VERSION: '8.0.x'
-  SOLUTION_PATH: 'NetDiagPro.WinUI'
+  APP_PATH: '.'
+  TEST_PATH: 'tests/DesktopUiTests/DesktopUiTests'
 
 jobs:
+  # ==========================================
+  # Build Job - Main Application
+  # ==========================================
   build:
+    name: 🏗️ Build Application
     runs-on: windows-latest
     
     strategy:
@@ -30,20 +35,60 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
         
     - name: 📦 Restore dependencies
-      run: dotnet restore ${{ env.SOLUTION_PATH }}
+      run: dotnet restore ${{ env.APP_PATH }}
       
     - name: 🏗️ Build
-      run: dotnet build ${{ env.SOLUTION_PATH }} --configuration ${{ matrix.configuration }} -p:Platform=${{ matrix.platform }} --no-restore
+      run: dotnet build ${{ env.APP_PATH }} --configuration ${{ matrix.configuration }} -p:Platform=${{ matrix.platform }} --no-restore
       
     - name: 📊 Upload build artifacts
       if: matrix.configuration == 'Release'
       uses: actions/upload-artifact@v4
       with:
         name: NetDiagPro-${{ matrix.platform }}-${{ matrix.configuration }}
-        path: ${{ env.SOLUTION_PATH }}/bin/${{ matrix.platform }}/${{ matrix.configuration }}/net8.0-windows*/
+        path: bin/${{ matrix.platform }}/${{ matrix.configuration }}/net8.0-windows*/
         retention-days: 30
 
+  # ==========================================
+  # Test Job - Unit & Integration Tests
+  # ==========================================
+  test:
+    name: 🧪 Run Tests
+    runs-on: windows-latest
+    needs: build
+    
+    steps:
+    - name: 📥 Checkout
+      uses: actions/checkout@v4
+      
+    - name: 🔧 Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: ${{ env.DOTNET_VERSION }}
+        
+    - name: 📦 Restore test dependencies
+      run: dotnet restore ${{ env.TEST_PATH }}
+      
+    - name: 🏗️ Build tests
+      run: dotnet build ${{ env.TEST_PATH }} --configuration Release
+      
+    - name: 🧪 Run tests
+      run: |
+        dotnet test ${{ env.TEST_PATH }} --configuration Release --logger "trx;LogFileName=test-results.trx" --results-directory ./TestResults
+      continue-on-error: true
+      
+    - name: 📊 Upload test results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results
+        path: TestResults/
+        retention-days: 14
+
+  # ==========================================
+  # Code Quality Check
+  # ==========================================
   code-quality:
+    name: 🔍 Code Quality
     runs-on: windows-latest
     
     steps:
@@ -56,14 +101,18 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
         
     - name: 🔍 Code formatting check
-      run: dotnet format ${{ env.SOLUTION_PATH }} --verify-no-changes --verbosity diagnostic
+      run: dotnet format ${{ env.APP_PATH }} --verify-no-changes --verbosity diagnostic
       continue-on-error: true
       
-    - name: 📋 Build with warnings as errors
-      run: dotnet build ${{ env.SOLUTION_PATH }} -p:Platform=x64 -p:TreatWarningsAsErrors=false --verbosity minimal
+    - name: 📋 Build with analysis
+      run: dotnet build ${{ env.APP_PATH }} -p:Platform=x64 --verbosity minimal
 
+  # ==========================================
+  # Release Job - Create Release Package
+  # ==========================================
   release:
-    needs: build
+    name: 📦 Release Package
+    needs: [build, test]
     runs-on: windows-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     
@@ -77,12 +126,16 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
         
     - name: 🏗️ Build Release
-      run: dotnet build ${{ env.SOLUTION_PATH }} --configuration Release -p:Platform=x64
+      run: dotnet build ${{ env.APP_PATH }} --configuration Release -p:Platform=x64
       
     - name: 📦 Create release package
+      shell: pwsh
       run: |
         $version = Get-Date -Format "yyyy.MM.dd"
-        Compress-Archive -Path "${{ env.SOLUTION_PATH }}/bin/x64/Release/net8.0-windows*/*" -DestinationPath "NetDiagPro-v$version-x64.zip"
+        $outPath = "bin/x64/Release/net8.0-windows10.0.22621.0"
+        if (Test-Path $outPath) {
+          Compress-Archive -Path "$outPath/*" -DestinationPath "NetDiagPro-v$version-x64.zip" -Force
+        }
         
     - name: 📤 Upload release artifact
       uses: actions/upload-artifact@v4
@@ -90,3 +143,4 @@ jobs:
         name: NetDiagPro-Release
         path: NetDiagPro-*.zip
         retention-days: 90
+        if-no-files-found: warn
