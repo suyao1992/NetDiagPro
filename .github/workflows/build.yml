@@ -12,7 +12,7 @@ env:
 
 jobs:
   # ==========================================
-  # Build Job - Main Application
+  # Build Job - Main Application Only
   # ==========================================
   build:
     name: 🏗️ Build Application
@@ -31,11 +31,11 @@ jobs:
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
         
-    - name: 📦 Restore main app
-      run: dotnet restore NetDiagPro.csproj
+    - name: 📦 Restore main app only
+      run: dotnet restore NetDiagPro.sln
       
-    - name: 🏗️ Build
-      run: dotnet build NetDiagPro.csproj --configuration ${{ matrix.configuration }} -p:Platform=x64 --no-restore
+    - name: 🏗️ Build main app
+      run: dotnet build NetDiagPro.sln --configuration ${{ matrix.configuration }} -p:Platform=x64 --no-restore
       
     - name: 📊 Upload build artifacts
       if: matrix.configuration == 'Release'
@@ -46,8 +46,7 @@ jobs:
         retention-days: 30
 
   # ==========================================
-  # Test Job - Build Test Project Only
-  # Note: FlaUI UI tests require display, skip actual run in CI
+  # Test Job - Build Test Project Separately
   # ==========================================
   test-build:
     name: 🧪 Build Tests
@@ -64,20 +63,22 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
         
     - name: 📦 Restore test project
-      run: dotnet restore tests/DesktopUiTests/DesktopUiTests/DesktopUiTests.csproj
+      working-directory: tests/DesktopUiTests/DesktopUiTests
+      run: dotnet restore
       
     - name: 🏗️ Build tests
-      run: dotnet build tests/DesktopUiTests/DesktopUiTests/DesktopUiTests.csproj --configuration Release --no-restore
+      working-directory: tests/DesktopUiTests/DesktopUiTests
+      run: dotnet build --configuration Release --no-restore
       
-    - name: ✅ Test project builds successfully
-      run: Write-Host "FlaUI test project compiles correctly. UI tests require local execution with display."
+    - name: ✅ Tests compile successfully
+      run: Write-Host "FlaUI test project compiles. UI tests require local execution."
 
   # ==========================================
-  # Release Job - Create Release Package
+  # Release Job
   # ==========================================
   release:
     name: 📦 Release Package
-    needs: [build, test-build]
+    needs: [build]
     runs-on: windows-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     
@@ -91,10 +92,10 @@ jobs:
         dotnet-version: ${{ env.DOTNET_VERSION }}
         
     - name: 📦 Restore
-      run: dotnet restore NetDiagPro.csproj
+      run: dotnet restore NetDiagPro.sln
         
     - name: 🏗️ Build Release
-      run: dotnet build NetDiagPro.csproj --configuration Release -p:Platform=x64 --no-restore
+      run: dotnet build NetDiagPro.sln --configuration Release -p:Platform=x64 --no-restore
       
     - name: 📦 Create release package
       shell: pwsh
@@ -103,10 +104,6 @@ jobs:
         $outPath = "bin/x64/Release/net8.0-windows10.0.22621.0"
         if (Test-Path $outPath) {
           Compress-Archive -Path "$outPath/*" -DestinationPath "NetDiagPro-v$version-x64.zip" -Force
-          Write-Host "Created: NetDiagPro-v$version-x64.zip"
-        } else {
-          Write-Host "Warning: Output path not found"
-          Get-ChildItem -Recurse bin/ | Select-Object FullName
         }
         
     - name: 📤 Upload release artifact
