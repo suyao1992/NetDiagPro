@@ -33,15 +33,15 @@ public sealed partial class SpeedTestPage : Page
 
             // Download test
             StatusText.Text = "正在测试下载速度...";
-            var downloadSpeed = await _speedService.MeasureDownloadSpeedAsync(
+            var downloadResult = await _speedService.MeasureDownloadSpeedAsync(
                 (speed) => DownloadSpeedText.Text = $"{speed:F1}");
-            DownloadSpeedText.Text = $"{downloadSpeed:F1}";
+            DownloadSpeedText.Text = $"{downloadResult.DownloadMbps:F1}";
 
             // Upload test
             StatusText.Text = "正在测试上传速度...";
-            var uploadSpeed = await _speedService.MeasureUploadSpeedAsync(
+            var uploadResult = await _speedService.MeasureUploadSpeedAsync(
                 (speed) => UploadSpeedText.Text = $"{speed:F1}");
-            UploadSpeedText.Text = $"{uploadSpeed:F1}";
+            UploadSpeedText.Text = $"{uploadResult.UploadMbps:F1}";
 
             // Save to history database
             await _db.SaveRecordAsync(
@@ -104,6 +104,7 @@ public sealed partial class SpeedTestPage : Page
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) });
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
         grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) });
+        grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Auto) });
 
         var iconText = new TextBlock { Text = icon, FontSize = 20, VerticalAlignment = VerticalAlignment.Center };
         Grid.SetColumn(iconText, 0);
@@ -116,17 +117,35 @@ public sealed partial class SpeedTestPage : Page
         };
         Grid.SetColumn(nameText, 1);
 
+        // Quality recommendation based on latency
+        var quality = GetRecommendedQuality(available, latency);
+        var qualityText = new TextBlock
+        {
+            Text = quality,
+            Margin = new Thickness(12, 0, 0, 0),
+            Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(
+                quality.Contains("4K") ? Microsoft.UI.Colors.DeepSkyBlue :
+                quality.Contains("1080p") ? Microsoft.UI.Colors.LimeGreen :
+                quality.Contains("720p") ? Microsoft.UI.Colors.Orange :
+                Microsoft.UI.Colors.Gray),
+            VerticalAlignment = VerticalAlignment.Center,
+            FontWeight = Microsoft.UI.Text.FontWeights.SemiBold
+        };
+        Grid.SetColumn(qualityText, 2);
+
         var statusText = new TextBlock
         {
             Text = available ? $"{latency:F0}ms" : "不可用",
+            Margin = new Thickness(12, 0, 0, 0),
             Foreground = new Microsoft.UI.Xaml.Media.SolidColorBrush(
                 available ? Microsoft.UI.Colors.Green : Microsoft.UI.Colors.Red),
             VerticalAlignment = VerticalAlignment.Center
         };
-        Grid.SetColumn(statusText, 2);
+        Grid.SetColumn(statusText, 3);
 
         grid.Children.Add(iconText);
         grid.Children.Add(nameText);
+        grid.Children.Add(qualityText);
         grid.Children.Add(statusText);
 
         var border = new Border
@@ -138,5 +157,19 @@ public sealed partial class SpeedTestPage : Page
         };
 
         StreamingResults.Items.Add(border);
+    }
+
+    private static string GetRecommendedQuality(bool available, double latency)
+    {
+        if (!available) return "--";
+        return latency switch
+        {
+            < 100 => "4K HDR",
+            < 200 => "4K",
+            < 400 => "1080p",
+            < 800 => "720p",
+            < 1500 => "480p",
+            _ => "低画质"
+        };
     }
 }

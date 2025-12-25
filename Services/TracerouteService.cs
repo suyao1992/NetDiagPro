@@ -35,8 +35,8 @@ public class TracerouteService
             RedirectStandardOutput = true,
             RedirectStandardError = true,
             UseShellExecute = false,
-            CreateNoWindow = true,
-            StandardOutputEncoding = System.Text.Encoding.GetEncoding("GB2312")
+            CreateNoWindow = true
+            // Note: Removed GB2312 encoding - use system default for compatibility
         };
 
         using var process = new Process { StartInfo = psi };
