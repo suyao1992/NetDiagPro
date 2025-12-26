@@ -4,14 +4,136 @@ using System.Text.RegularExpressions;
 namespace NetDiagPro.Services;
 
 /// <summary>
+/// WiFi 可用性状态
+/// </summary>
+public enum WifiAvailability
+{
+    Available,           // WiFi 可用
+    ServiceNotRunning,   // WLAN 服务未运行
+    NoAdapter,           // 没有无线网卡
+    Disabled,            // WiFi 已禁用
+    Unknown              // 未知错误
+}
+
+/// <summary>
+/// WiFi 状态结果
+/// </summary>
+public class WifiStatusResult
+{
+    public WifiAvailability Availability { get; set; }
+    public string Message { get; set; } = "";
+    public WifiConnectionInfo? Connection { get; set; }
+}
+
+/// <summary>
 /// Wi-Fi 分析服务 - 信道扫描、干扰检测、优化建议
 /// </summary>
 public class WifiAnalyzerService
 {
     /// <summary>
+    /// 检查 WiFi 可用性并获取状态
+    /// </summary>
+    public async Task<WifiStatusResult> CheckWifiStatusAsync()
+    {
+        var result = new WifiStatusResult();
+        
+        try
+        {
+            var psi = new ProcessStartInfo
+            {
+                FileName = "netsh",
+                Arguments = "wlan show interfaces",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true
+            };
+
+            using var process = Process.Start(psi);
+            if (process == null)
+            {
+                result.Availability = WifiAvailability.Unknown;
+                result.Message = "无法启动 netsh 进程";
+                return result;
+            }
+
+            var output = await process.StandardOutput.ReadToEndAsync();
+            var error = await process.StandardError.ReadToEndAsync();
+            await process.WaitForExitAsync();
+
+            // 检查各种状态 (中英文兼容)
+            if (output.Contains("没有运行") || output.Contains("is not running") || 
+                error.Contains("没有运行") || error.Contains("is not running"))
+            {
+                result.Availability = WifiAvailability.ServiceNotRunning;
+                result.Message = "无线自动配置服务 (WLAN AutoConfig) 未运行\n请在服务管理器中启动 'WLAN AutoConfig' 服务";
+                return result;
+            }
+
+            if (output.Contains("无接口") || output.Contains("There is no wireless interface") ||
+                output.Contains("没有无线接口"))
+            {
+                result.Availability = WifiAvailability.NoAdapter;
+                result.Message = "未检测到无线网卡\n此设备可能不支持 Wi-Fi 或无线适配器已禁用";
+                return result;
+            }
+
+            // 检查是否已连接 (支持中英文)
+            if (!output.Contains("SSID") && !output.Contains("已连接") && !output.Contains("connected"))
+            {
+                result.Availability = WifiAvailability.Available;
+                result.Message = "Wi-Fi 可用但未连接到任何网络";
+                return result;
+            }
+
+            // 已连接，解析连接信息
+            result.Availability = WifiAvailability.Available;
+            result.Connection = ParseWifiConnection(output);
+            result.Message = result.Connection != null ? "已连接" : "Wi-Fi 可用";
+        }
+        catch (Exception ex)
+        {
+            result.Availability = WifiAvailability.Unknown;
+            result.Message = $"检查 WiFi 状态时出错: {ex.Message}";
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// 解析 WiFi 连接信息
+    /// </summary>
+    private WifiConnectionInfo? ParseWifiConnection(string output)
+    {
+        try
+        {
+            var ssid = ExtractValue(output, @"^\s*SSID\s*:\s*(.+)$");
+            if (string.IsNullOrEmpty(ssid)) return null;
+
+            return new WifiConnectionInfo
+            {
+                SSID = ssid,
+                BSSID = ExtractValue(output, @"BSSID\s*:\s*([0-9a-fA-F:]+)"),
+                NetworkType = ExtractValue(output, @"(?:网络类型|Network type)\s*:\s*(.+)"),
+                Authentication = ExtractValue(output, @"(?:身份验证|Authentication)\s*:\s*(.+)"),
+                Cipher = ExtractValue(output, @"(?:密码|Cipher)\s*:\s*(.+)"),
+                Channel = int.TryParse(ExtractValue(output, @"(?:信道|Channel)\s*:\s*(\d+)"), out var ch) ? ch : 0,
+                Signal = int.TryParse(ExtractValue(output, @"(?:信号|Signal)\s*:\s*(\d+)%?"), out var sig) ? sig : 0,
+                ReceiveRate = ExtractValue(output, @"(?:接收速率|Receive rate)[^:]*:\s*(.+)"),
+                TransmitRate = ExtractValue(output, @"(?:传输速率|Transmit rate)[^:]*:\s*(.+)"),
+                Band = ExtractValue(output, @"(?:无线电类型|Radio type)\s*:\s*(.+)")
+            };
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
+    /// <summary>
     /// 扫描周围 Wi-Fi 网络
     /// </summary>
-    public async Task<List<WifiNetwork>> ScanNetworksAsync()
+    public async Task<(List<WifiNetwork> Networks, string? Error)> ScanNetworksAsync()
     {
         var networks = new List<WifiNetwork>();
 
@@ -22,18 +144,33 @@ public class WifiAnalyzerService
                 FileName = "netsh",
                 Arguments = "wlan show networks mode=bssid",
                 RedirectStandardOutput = true,
+                RedirectStandardError = true,
                 UseShellExecute = false,
                 CreateNoWindow = true
             };
 
             using var process = Process.Start(psi);
-            if (process == null) return networks;
+            if (process == null) return (networks, "无法启动扫描进程");
 
             var output = await process.StandardOutput.ReadToEndAsync();
+            var error = await process.StandardError.ReadToEndAsync();
             await process.WaitForExitAsync();
 
-            // Parse output
-            var blocks = Regex.Split(output, @"SSID \d+ :");
+            // 检查错误
+            if (output.Contains("没有运行") || error.Contains("没有运行") ||
+                output.Contains("is not running") || error.Contains("is not running"))
+            {
+                return (networks, "WLAN 服务未运行");
+            }
+
+            if (output.Contains("无接口") || output.Contains("no wireless interface"))
+            {
+                return (networks, "未检测到无线网卡");
+            }
+
+            // Parse output - 支持中英文
+            // 中文: "SSID 1 :" 或 英文: "SSID 1 :"
+            var blocks = Regex.Split(output, @"SSID\s+\d+\s*:");
             
             foreach (var block in blocks.Skip(1))
             {
@@ -44,9 +181,12 @@ public class WifiAnalyzerService
                 }
             }
         }
-        catch { }
+        catch (Exception ex)
+        {
+            return (networks, $"扫描出错: {ex.Message}");
+        }
 
-        return networks.OrderByDescending(n => n.Signal).ToList();
+        return (networks.OrderByDescending(n => n.Signal).ToList(), null);
     }
 
     /// <summary>
@@ -54,42 +194,8 @@ public class WifiAnalyzerService
     /// </summary>
     public async Task<WifiConnectionInfo?> GetCurrentConnectionAsync()
     {
-        try
-        {
-            var psi = new ProcessStartInfo
-            {
-                FileName = "netsh",
-                Arguments = "wlan show interfaces",
-                RedirectStandardOutput = true,
-                UseShellExecute = false,
-                CreateNoWindow = true
-            };
-
-            using var process = Process.Start(psi);
-            if (process == null) return null;
-
-            var output = await process.StandardOutput.ReadToEndAsync();
-            await process.WaitForExitAsync();
-
-            if (output.Contains("无接口") || !output.Contains("SSID"))
-                return null;
-
-            return new WifiConnectionInfo
-            {
-                SSID = ExtractValue(output, @"SSID\s*:\s*(.+)"),
-                BSSID = ExtractValue(output, @"BSSID\s*:\s*(.+)"),
-                NetworkType = ExtractValue(output, @"网络类型\s*:\s*(.+)|Network type\s*:\s*(.+)"),
-                Authentication = ExtractValue(output, @"身份验证\s*:\s*(.+)|Authentication\s*:\s*(.+)"),
-                Cipher = ExtractValue(output, @"密码\s*:\s*(.+)|Cipher\s*:\s*(.+)"),
-                Channel = int.TryParse(ExtractValue(output, @"信道\s*:\s*(\d+)|Channel\s*:\s*(\d+)"), out var ch) ? ch : 0,
-                Signal = int.TryParse(ExtractValue(output, @"信号\s*:\s*(\d+)%|Signal\s*:\s*(\d+)%"), out var sig) ? sig : 0,
-                ReceiveRate = ExtractValue(output, @"接收速率.*:\s*(.+)|Receive rate.*:\s*(.+)"),
-                TransmitRate = ExtractValue(output, @"传输速率.*:\s*(.+)|Transmit rate.*:\s*(.+)"),
-                Band = ExtractValue(output, @"无线电类型\s*:\s*(.+)|Radio type\s*:\s*(.+)")
-            };
-        }
-        catch { }
-        return null;
+        var status = await CheckWifiStatusAsync();
+        return status.Connection;
     }
 
     /// <summary>
@@ -98,7 +204,14 @@ public class WifiAnalyzerService
     public async Task<ChannelAnalysis> AnalyzeChannelsAsync()
     {
         var analysis = new ChannelAnalysis();
-        var networks = await ScanNetworksAsync();
+        var (networks, error) = await ScanNetworksAsync();
+        
+        // 如果扫描出错，设置错误信息
+        if (error != null)
+        {
+            analysis.Error = error;
+            return analysis;
+        }
 
         // 2.4GHz 信道 (1-13)
         var channels24 = new int[14];
@@ -273,6 +386,7 @@ public class ChannelAnalysis
     public int Best5Channel { get; set; }
     public string CongestionLevel { get; set; } = "未知";
     public string Recommendation { get; set; } = "";
+    public string? Error { get; set; }  // 扫描错误信息
     public Dictionary<int, int> Channel24Usage { get; set; } = new();
     public Dictionary<int, int> Channel5Usage { get; set; } = new();
 }

@@ -24,8 +24,10 @@
         <!-- Input & Controls -->
         <StackPanel Grid.Row="1" Orientation="Horizontal" Spacing="12" Margin="0,20,0,20">
             <TextBox x:Name="TargetInput" PlaceholderText="输入域名或 IP (如 google.com)" 
-                     MinWidth="300" />
-            <Button x:Name="TraceBtn" Click="Trace_Click" Style="{StaticResource AccentButtonStyle}">
+                     MinWidth="300"
+                     AutomationProperties.AutomationId="TracerouteHostInput" />
+            <Button x:Name="TraceBtn" Click="Trace_Click" Style="{StaticResource AccentButtonStyle}"
+                    AutomationProperties.AutomationId="StartTracerouteBtn">
                 <StackPanel Orientation="Horizontal" Spacing="8">
                     <FontIcon Glyph="&#xE909;" FontSize="16" />
                     <TextBlock Text="开始追踪" />
@@ -41,7 +43,7 @@
         <Border Grid.Row="2" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                 CornerRadius="8" Padding="16">
             <ScrollViewer>
-                <ItemsControl x:Name="HopsContainer">
+                <ItemsControl x:Name="HopsContainer" AutomationProperties.AutomationId="TracerouteHopsList">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <StackPanel Spacing="8" />
